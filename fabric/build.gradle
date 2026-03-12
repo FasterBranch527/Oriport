@@ -132,60 +132,14 @@ dependencies {
     modDataImplementation "curse.maven:energized-power-782147:$energized_power_version_id"
     // Mythic Metals
     modDataImplementation "curse.maven:mythicmetals-410127:$mythic_metals_version_id"
-    modDataRuntimeOnly("org.ladysnake.cardinal-components-api:cardinal-components-base:$cardinal_components_version") { transitive = false }
-    modDataRuntimeOnly("org.ladysnake.cardinal-components-api:cardinal-components-entity:$cardinal_components_version") { transitive = false }
+    modDataRuntimeOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cardinal_components_version") { transitive = false }
+    modDataRuntimeOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cardinal_components_version") { transitive = false }
     modDataRuntimeOnly "maven.modrinth:additionalentityattributes:$additional_entity_attributes_version"
     // Tech Reborn
     modDataImplementation "curse.maven:techreborn-233564:5608205"
     modDataImplementation "curse.maven:reborncore-237903:5608204"
 }
 
-publishMods {
-    file = remapJar.archiveFile
-    changelog = file("../CHANGELOG.MD").getText()
-    type = STABLE
-    modLoaders.add("fabric")
-
-    modrinth {
-        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        projectId = "4sYI62kA"
-        minecraftVersions.add("1.21.1")
-        minecraftVersions.add("1.21")
-
-        requires("owo-lib")
-        requires("geckolib")
-        requires("athena-ctm")
-        requires("fabric-api")
-        requires("architectury-api")
-
-        announcementTitle = "Fabric Version on Modrinth"
-    }
-
-    curseforge {
-        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
-        projectId = "1030830"
-        minecraftVersions.add("1.21.1")
-        minecraftVersions.add("1.21")
-
-        requires("owo-lib")
-        requires("geckolib")
-        requires("athena")
-        requires("fabric-api")
-        requires("architectury-api")
-
-        javaVersions.add(JavaVersion.VERSION_21)
-        clientRequired = true
-        serverRequired = true
-
-        projectSlug = "oritech"
-        announcementTitle = "Fabric Version on CurseForge"
-    }
-
-    github {
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        parent project(":").tasks.named("publishGithub")
-    }
-}
 
 def commonIntermediaryJar = tasks.register('commonIntermediaryJar', RemapJarTask) {
     dependsOn(tasks.named('jar', Jar))
@@ -239,14 +193,4 @@ def commonIntermediarySourcesJar = tasks.register('commonIntermediarySourcesJar'
 artifacts {
     archives(commonIntermediaryJar)
     archives(commonIntermediarySourcesJar)
-}
-
-publishing {
-    publications {
-        register("commonIntermediary", MavenPublication) {
-            artifactId = "${project(':common').base.archivesName.get()}-intermediary"
-            artifact(commonIntermediaryJar)
-            artifact(commonIntermediarySourcesJar)
-        }
-    }
 }

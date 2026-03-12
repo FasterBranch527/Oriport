@@ -1,18 +1,3 @@
-plugins {
-    id 'net.neoforged.moddev'
-}
-
-neoForge {
-    // only apply NeoForm to use Vanilla mode (no loader)
-    neoFormVersion = "$minecraft_version-$neoform_version"
-    parchment {
-        minecraftVersion = minecraft_version
-        mappingsVersion = parchment_mappings
-    }
-
-    validateAccessTransformers = true
-    interfaceInjectionData.from file('src/main/resources/interfaces.json').absolutePath
-}
 
 configurations {
     commonJava {
@@ -33,13 +18,6 @@ artifacts {
 }
 
 dependencies {
-    // Architectury API
-    compileOnlyApi "dev.architectury:architectury-neoforge:$architectury_api_version"
-    // EMI
-    compileOnly "dev.emi:emi-xplat-mojmap:${emi_version}"
-    // GeckoLib
-    compileOnlyApi "software.bernie.geckolib:geckolib-neoforge-$minecraft_version:$geckolib_version"
-    // Jade
     compileOnly "curse.maven:jade-324717:6853386"
     // JEI
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
@@ -51,14 +29,5 @@ dependencies {
     annotationProcessor 'io.github.llamalad7:mixinextras-common:0.3.5'
     // Oracle Index
     compileOnly "curse.maven:oracle-index-1206582:7590938"
-    // owo-lib
-    compileOnlyApi "io.wispforest:owo-lib-neoforge:$owo_neo_version"
-    annotationProcessor "io.wispforest:owo-lib-neoforge:$owo_neo_version"
-    accessTransformers "io.wispforest:owo-lib-neoforge:$owo_neo_version"
-    interfaceInjectionData "io.wispforest:owo-lib-neoforge:$owo_neo_version"
-    // REI
-    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:$rei_version"
 
-    // ftb filters
-    compileOnly("dev.ftb.mods:ftb-filter-system-neoforge:$ftb_filters_version") { transitive = false }
 }

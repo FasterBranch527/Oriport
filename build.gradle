@@ -59,7 +59,7 @@ subprojects {
         // FTB Chunks
         maven { url = "https://maven.ftb.dev/releases" }
         // GeckoLib
-        maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+        maven { url = 'https://dl.cloudsmith.io/public/tslat/sbl/maven/' }
         // owo-lib
         maven { url = 'https://maven.wispforest.io/releases/' }
     }

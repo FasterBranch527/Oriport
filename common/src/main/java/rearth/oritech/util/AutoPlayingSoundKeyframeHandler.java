@@ -1,9 +1,9 @@
 package rearth.oritech.util;
 
 import rearth.oritech.Oritech;
-import software.bernie.geckolib.animatable.GeoAnimatable;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -36,7 +36,8 @@ public class AutoPlayingSoundKeyframeHandler<A extends GeoAnimatable> implements
     @Override
     public void handle(SoundKeyframeEvent<A> event) {
         var segments = event.getKeyframeData().getSound().split("\\|");
-        var sound = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse(segments[0]));
+        var soundId = ResourceLocation.tryParse(segments[0]);
+        var sound = soundId != null ? BuiltInRegistries.SOUND_EVENT.get(soundId) : null;
         
         if (sound != null) {
             

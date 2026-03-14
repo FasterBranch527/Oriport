@@ -18,6 +18,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -46,37 +48,37 @@ import java.util.Locale;
 import java.util.Optional;
 
 public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends BaseOwoHandledScreen<FlowLayout, S> {
-    
-    
+
+
     public static final ResourceLocation BACKGROUND = Oritech.id("textures/gui/modular/gui_base.png");
     public static final ResourceLocation ITEM_SLOT = Oritech.id("textures/gui/modular/itemslot.png");
     public static final ResourceLocation GUI_COMPONENTS = Oritech.id("textures/gui/modular/machine_gui_components.png");
     public static final int GRAY_TEXT_COLOR = new Color(0.2f, 0.2f, 0.3f).rgb();
-    public static Surface ORITECH_PANEL = (context, component) -> NinePatchTexture.draw(ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel"), context, component);
-    public static Surface ORITECH_PANEL_DARK = (context, component) -> NinePatchTexture.draw(ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel_dark"), context, component);
-    public static Surface ORITECH_PANEL_ORANGE = (context, component) -> NinePatchTexture.draw(ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel_orange"), context, component);
+    public static Surface ORITECH_PANEL = (context, component) -> NinePatchTexture.draw(new ResourceLocation(Oritech.MOD_ID, "bedrock_panel"), context, component);
+    public static Surface ORITECH_PANEL_DARK = (context, component) -> NinePatchTexture.draw(new ResourceLocation(Oritech.MOD_ID, "bedrock_panel_dark"), context, component);
+    public static Surface ORITECH_PANEL_ORANGE = (context, component) -> NinePatchTexture.draw(new ResourceLocation(Oritech.MOD_ID, "bedrock_panel_orange"), context, component);
 
     public static ButtonComponent.Renderer ORITECH_BUTTON = (matrices, button, delta) -> {
         RenderSystem.enableDepthTest();
-        var texture = button.active ? (button.isHovered() ? Minecraft.getInstance().mouseHandler.isLeftPressed() ? ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel_pressed") : ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel_hover") : ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel")) : ButtonComponent.DISABLED_TEXTURE;
+        var texture = button.active ? (button.isHovered() ? Minecraft.getInstance().mouseHandler.isLeftPressed() ? new ResourceLocation(Oritech.MOD_ID, "bedrock_panel_pressed") : new ResourceLocation(Oritech.MOD_ID, "bedrock_panel_hover") : new ResourceLocation(Oritech.MOD_ID, "bedrock_panel")) : ButtonComponent.DISABLED_TEXTURE;
         NinePatchTexture.draw(texture, matrices, button.getX(), button.getY(), button.width(), button.height());
     };
     public static ButtonComponent.Renderer ORITECH_BUTTON_DARK = (matrices, button, delta) -> {
         RenderSystem.enableDepthTest();
-        var texture = button.active ? (button.isHovered() ? Minecraft.getInstance().mouseHandler.isLeftPressed() ? ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel_pressed") : ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel_dark_hover") : ResourceLocation.fromNamespaceAndPath(Oritech.MOD_ID, "bedrock_panel_dark")) : ButtonComponent.DISABLED_TEXTURE;
+        var texture = button.active ? (button.isHovered() ? Minecraft.getInstance().mouseHandler.isLeftPressed() ? new ResourceLocation(Oritech.MOD_ID, "bedrock_panel_pressed") : new ResourceLocation(Oritech.MOD_ID, "bedrock_panel_dark_hover") : new ResourceLocation(Oritech.MOD_ID, "bedrock_panel_dark")) : ButtonComponent.DISABLED_TEXTURE;
         NinePatchTexture.draw(texture, matrices, button.getX(), button.getY(), button.width(), button.height());
     };
-    
+
     public FlowLayout root;
     protected TextureComponent progress_indicator;
     protected TextureComponent energyIndicator;
     private ButtonComponent cycleInputButton;
-    
+
     private final FluidDisplay genericDisplay;
     private final FluidDisplay steamDisplay;
     private final FluidDisplay waterDisplay;
     protected final LabelComponent steamProductionLabel;
-    
+
     protected static final class FluidDisplay {
         private final BoxComponent fillOverlay;
         private float lastFill;
@@ -85,7 +87,7 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
         private final TextureComponent foreGround;
         private final ScreenProvider.BarConfiguration config;
         private final FluidApi.SingleSlotStorage storage;
-        
+
         private FluidDisplay(BoxComponent fillOverlay, float lastFill, Fluid lastDrawnFluid, ColoredSpriteComponent background, TextureComponent foreGround, ScreenProvider.BarConfiguration config, FluidApi.SingleSlotStorage storage) {
             this.fillOverlay = fillOverlay;
             this.lastFill = lastFill;
@@ -96,22 +98,22 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
             this.storage = storage;
         }
     }
-    
+
     public BasicMachineScreen(S handler, Inventory inventory, Component title) {
-        
+
         super(handler, inventory, title);
-        
+
         if (handler.mainFluidContainer != null) {
             var config = handler.screenData.getFluidConfiguration();
             genericDisplay = initFluidDisplay(handler.mainFluidContainer, config);
         } else {
             genericDisplay = null;
         }
-        
+
         if (handler.steamStorage != null) {
             var config = getBoilerInConfig();
             waterDisplay = initFluidDisplay(handler.waterStorage, config);
-            
+
             var configSteam = getBoilerOutConfig();
             steamDisplay = initFluidDisplay(handler.steamStorage, configSteam);
             // the label is then actually added to the screen in the upgradable screen extension
@@ -122,30 +124,30 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
             waterDisplay = null;
             steamProductionLabel = null;
         }
-        
+
     }
-    
+
     public ScreenProvider.BarConfiguration getBoilerInConfig() {
         return menu.screenData.getEnergyConfiguration();
     }
-    
+
     public ScreenProvider.BarConfiguration getBoilerOutConfig() {
         var config = getBoilerInConfig();
         return new ScreenProvider.BarConfiguration(config.x() + config.width() + 8, config.y(), config.width(), config.height());
     }
-    
+
     public ResourceLocation getGuiComponents() {
         return GUI_COMPONENTS;
     }
-    
+
     public ResourceLocation getItemSlot() {
         return ITEM_SLOT;
     }
-    
+
     public ResourceLocation getBackground() {
         return BACKGROUND;
     }
-    
+
     protected FluidDisplay initFluidDisplay(FluidApi.SingleSlotStorage container, ScreenProvider.BarConfiguration config) {
         var lastFill = 1 - ((float) container.getStack().getAmount() / container.getCapacity());
         var background = createFluidRenderer(container.getStack(), config);
@@ -161,25 +163,25 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
 
         return new FluidDisplay(fillOverlay, lastFill, container.getStack().getFluid(), background, foreGround, config, container);
     }
-    
+
     public static io.wispforest.owo.ui.core.Component getItemFrame(int x, int y) {
         return Components.texture(ITEM_SLOT, 0, 0, 18, 18, 18, 18).sizing(Sizing.fixed(18)).positioning(Positioning.absolute(x - 1, y - 1));
     }
-    
+
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
-    
+
     @Override
     protected void build(FlowLayout rootComponent) {
         this.root = rootComponent;
-        
+
         rootComponent
           .surface(Surface.VANILLA_TRANSLUCENT)
           .horizontalAlignment(HorizontalAlignment.CENTER)
           .verticalAlignment(VerticalAlignment.CENTER);
-        
+
         if (showExtensionPanel()) {
             rootComponent.child(
               Containers.horizontalFlow(Sizing.fixed(176 + 250), Sizing.fixed(166 + 40))
@@ -191,7 +193,7 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
                 .zIndex(-1)
             );
         }
-        
+
         // equipment panel
         if (menu.armorSlots != null) {
             rootComponent.child(
@@ -204,7 +206,7 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
                 .zIndex(-1)
             );
         }
-        
+
         // show oracle lib help button
         if (Oritech.CONFIG.enableHelpButton()) {
             var hasOracleLib = Platform.isModLoaded("oracle_index");
@@ -216,7 +218,7 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
             } else {
                 oracleButton.tooltip(Component.translatable("tooltip.oritech.oracle_missing"));
             }
-            
+
             // calculate help button position
             oracleButton.positioning(Positioning.relative(0, 96));
             oracleButton.zIndex(10);
@@ -227,22 +229,22 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
                     .positioning(Positioning.relative(50, 50)));
             }
         }
-        
+
         rootComponent.child(
           Components.texture(BACKGROUND, 0, 0, 176, 166, 176, 166)
         ).child(
           buildOverlay().positioning(Positioning.relative(50, 50))
         );
     }
-    
+
     public boolean showExtensionPanel() {
         return menu.screenData.showExpansionPanel();
     }
-    
+
     @Override
     protected void containerTick() {
         super.containerTick();
-        
+
         if (menu.screenData.showEnergy()) {
             if (menu.steamStorage != null) {
                 updateFluidDisplay(waterDisplay);
@@ -251,75 +253,75 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
                 updateEnergyBar();
             }
         }
-        
+
         if (menu.screenData.showProgress())
             updateProgressBar();
-        
+
         if (showExtensionPanel())
             updateSettingsButtons();
-        
+
         if (menu.mainFluidContainer != null)
             updateFluidDisplay(genericDisplay);
-        
+
         if (steamProductionLabel != null) {
             var productionRate = menu.screenData.getDisplayedEnergyUsage() * Oritech.CONFIG.generators.steamEngineData.rfToSteamRatio();
             productionRate = Math.min(this.waterDisplay.storage.getStack().getAmount(), productionRate);
             steamProductionLabel.text(Component.translatable("title.oritech.steam_production", String.format("%.0f", productionRate)));
         }
     }
-    
+
     private void updateProgressBar() {
         var config = menu.screenData.getIndicatorConfiguration();
         var progress = menu.screenData.getProgress();
-        
-        
+
+
         if (menu.blockEntity instanceof MachineBlockEntity machineEntity && (machineEntity.getCurrentRecipe().getTime() > 0 || machineEntity.progress > 0)) {
-            
+
             var progressTicks = machineEntity.progress;
             var recipeDurationTicks = machineEntity.getCurrentRecipe().getTime();
             var effectiveDurationTicks = (int) (recipeDurationTicks * machineEntity.getSpeedMultiplier());
-            
+
             if (machineEntity instanceof UpgradableGeneratorBlockEntity generatorBlock) {
                 if (recipeDurationTicks <= 0)
                     recipeDurationTicks = (int) (generatorBlock.currentMaxBurnTime / generatorBlock.getSpeedMultiplier() * generatorBlock.getEfficiencyMultiplier());
                 effectiveDurationTicks = generatorBlock.currentMaxBurnTime;
             }
-            
+
             if (machineEntity instanceof BasicGeneratorEntity generatorEntity)
                 recipeDurationTicks = generatorEntity.currentMaxBurnTime;
-            
-            
+
+
             progress_indicator.tooltip(Component.translatable("tooltip.oritech.progress_indicator", progressTicks, effectiveDurationTicks, recipeDurationTicks));
         }
-        
-        
+
+
         if (config.horizontal()) {
             progress_indicator.visibleArea(PositionedRectangle.of(0, 0, (int) (config.width() * progress), config.height()));
         } else {
             progress_indicator.visibleArea(PositionedRectangle.of(0, 0, config.width(), (int) (config.height() * progress)));
         }
     }
-    
+
     protected void updateEnergyBar() {
-        
+
         var capacity = menu.energyStorage.getCapacity();
         var amount = menu.energyStorage.getAmount();
         var transfer = (long) menu.screenData.getDisplayedEnergyTransfer();
         var usage = (long) menu.screenData.getDisplayedEnergyUsage();
-        
+
         var fillAmount = (float) amount / capacity;
         var tooltipText = getEnergyTooltip(amount, capacity, usage, transfer);
-        
+
         var isAtomicForge = menu.blockEntity instanceof AtomicForgeBlockEntity;
         if (isAtomicForge)
             tooltipText = tooltipText.plainCopy().append(Component.translatable("tooltip.oritech.atomic_forge_energy_tip"));
-        
+
         energyIndicator.tooltip(tooltipText);
         energyIndicator.visibleArea(PositionedRectangle.of(0, 96 - ((int) (96 * (fillAmount))), 24, (int) (96 * fillAmount)));
     }
-    
+
     public static Component getEnergyTooltip(long amount, long max, long showedUsage, long showedTransfer) {
-        
+
         var percentage = (float) amount / max;
         var energyFill = String.format("%.1f", percentage * 100);
         var storedAmount = TooltipHelper.getEnergyText(amount);
@@ -328,12 +330,12 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
         var transfer = TooltipHelper.getEnergyText(showedTransfer);
         return Component.translatable("tooltip.oritech.energy_usage", storedAmount, maxAmount, energyFill, usageText, transfer);
     }
-    
+
     public void updateSettingsButtons() {
-        
+
         var activeMode = menu.screenData.getInventoryInputMode();
         var modeName = activeMode.name().toLowerCase(Locale.ROOT);
-        
+
         if (activeMode.equals(InventoryInputMode.SIDED) && menu.blockEntity instanceof MachineBlockEntity machineBlock) {
             var tooltip = Component.translatable("tooltip.%s.input_mode_%s".formatted(Oritech.MOD_ID, modeName));
             var assignment = machineBlock.getSlotAssignments();
@@ -343,84 +345,84 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
                     key = "tooltip.oritech.mode_sided_bottom";
                 if (direction.equals(Direction.UP))
                     key = "tooltip.oritech.mode_sided_top";
-                
+
                 var horizontalOrdinal = 0;
                 if (direction.equals(Direction.EAST)) horizontalOrdinal = 1;
                 if (direction.equals(Direction.SOUTH)) horizontalOrdinal = 2;
                 if (direction.equals(Direction.WEST)) horizontalOrdinal = 3;
                 var inputSlotIndex = assignment.inputStart() + horizontalOrdinal % assignment.inputCount();
-                
+
                 tooltip = tooltip.append(Component.translatable(key, StringUtils.capitalize(direction.toString()), inputSlotIndex));
             }
             cycleInputButton.tooltip(tooltip);
         } else {
             cycleInputButton.tooltip(Component.translatable("tooltip.%s.input_mode_%s".formatted(Oritech.MOD_ID, modeName)));
         }
-        cycleInputButton.setMessage(Component.translatable("button.%s.input_mode_%s".formatted(Oritech.MOD_ID, modeName)).withColor(GRAY_TEXT_COLOR));
-        cycleInputButton.setMessage(Component.translatable("button.%s.input_mode_%s".formatted(Oritech.MOD_ID, modeName)).withColor(GRAY_TEXT_COLOR));
-        
+        cycleInputButton.setMessage(Component.translatable("button.%s.input_mode_%s".formatted(Oritech.MOD_ID, modeName)).withStyle(style -> style.withColor(TextColor.fromRgb(GRAY_TEXT_COLOR))));
+        cycleInputButton.setMessage(Component.translatable("button.%s.input_mode_%s".formatted(Oritech.MOD_ID, modeName)).withStyle(style -> style.withColor(TextColor.fromRgb(GRAY_TEXT_COLOR))));
+
     }
-    
+
     private io.wispforest.owo.ui.core.Component buildExtensionPanel() {
-        
+
         var container = Containers.verticalFlow(Sizing.content(), Sizing.content());
         container.surface(Surface.PANEL_INSET);
         container.horizontalAlignment(HorizontalAlignment.CENTER);
-        
+
         container.padding(Insets.of(1, 4, 1, 1));
         container.margins(Insets.of(7));
-        
+
         addExtensionComponents(container);
         updateSettingsButtons();
-        
+
         return container;
     }
-    
+
     private io.wispforest.owo.ui.core.Component buildEquipmentPanel() {
-        
+
         var container = Containers.verticalFlow(Sizing.content(), Sizing.content());
         container.surface(Surface.PANEL_INSET);
         container.horizontalAlignment(HorizontalAlignment.CENTER);
-        
+
         container.padding(Insets.of(2));
         container.margins(Insets.of(6));
-        
+
         for (int i = menu.armorSlots.size() - 1; i >= 0; i--) {
             var slotId = menu.armorSlots.get(i);
-            
+
             var slotContainer = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-            
+
             var slotComponent = slotAsComponent(slotId);
             var background = Components.texture(getEquipmentSlotTexture(i), 0, 0, 16, 16, 16, 16);
-            
+
             slotContainer.child(slotComponent);
             slotContainer.child(background.positioning(Positioning.absolute(0, 0)));
-            
+
             container.child(slotContainer.margins(Insets.of(1)));
-            
+
             // separator box
             if (i > 0)
                 container.child(Components.box(Sizing.fixed(18), Sizing.fixed(1)).color(new Color(0.8f, 0.8f, 0.8f)));
         }
-        
+
         return container;
     }
-    
+
     private ResourceLocation getEquipmentSlotTexture(int armorSlot) {
         return switch (armorSlot) {
-            case 0 -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/empty_armor_slot_boots.png");
-            case 1 -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/empty_armor_slot_leggings.png");
-            case 2 -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/empty_armor_slot_chestplate.png");
-            case 3 -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/empty_armor_slot_helmet.png");
-            case 4 -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/empty_slot_axe.png");
+            case 0 -> new ResourceLocation("minecraft", "textures/item/empty_armor_slot_boots.png");
+            case 1 -> new ResourceLocation("minecraft", "textures/item/empty_armor_slot_leggings.png");
+            case 2 -> new ResourceLocation("minecraft", "textures/item/empty_armor_slot_chestplate.png");
+            case 3 -> new ResourceLocation("minecraft", "textures/item/empty_armor_slot_helmet.png");
+            case 4 -> new ResourceLocation("minecraft", "textures/item/empty_slot_axe.png");
             default -> null;
         };
-        
+
     }
-    
+
     public void addExtensionComponents(FlowLayout container) {
-        
-        cycleInputButton = Components.button(Component.translatable("button.oritech.input_mode_fill_matching_recipe").withColor(GRAY_TEXT_COLOR),
+
+        cycleInputButton = Components.button(Component.translatable("button.oritech.input_mode_fill_matching_recipe").withStyle(style -> style.withColor(TextColor.fromRgb(GRAY_TEXT_COLOR))),
           button -> {
               NetworkManager.sendToServer(new MachineBlockEntity.InventoryInputModeSelectorPacket(menu.blockPos));
           });
@@ -428,65 +430,65 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
         cycleInputButton.margins(Insets.of(3));
         cycleInputButton.renderer(ORITECH_BUTTON);
         cycleInputButton.textShadow(false);
-        
+
         container.child(Components.label(Component.translatable("title.oritech.details")).margins(Insets.of(3, 1, 1, 1)));
-        
+
         var inputSlots = menu.screenData.getGuiSlots().stream().filter(slot -> !slot.output()).count();
         if (menu.screenData.inputOptionsEnabled() && inputSlots > 1)
             container.child(cycleInputButton);
-        
+
         for (var label : menu.screenData.getExtraExtensionLabels()) {
             container.child(Components.label(label.getA()).tooltip(label.getB()).margins(Insets.of(3)));
         }
-        
+
         if (menu.showRedstoneAddon()) {
             // separator
             container.child(Components.box(Sizing.fixed(73), Sizing.fixed(1))
                               .color(new Color(0.8f, 0.8f, 0.8f))
                               .margins(Insets.of(2)));
-            
+
             // current input state
             var hasRedstone = menu.screenData.receivedRedstoneSignal() > 0;
             var statusContainer = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-            
+
             statusContainer.child(Components.block(Blocks.REDSTONE_TORCH.defaultBlockState().setValue(RedstoneTorchBlock.LIT, hasRedstone))
                                     .sizing(Sizing.fixed(20)).margins(Insets.of(-6, -4, -8, -4)));
             statusContainer.child(Components.label(Component.translatable("text.oritech.redstone_power", menu.screenData.receivedRedstoneSignal()))
                               .margins(Insets.of(3, 1, 1, 1)));
-            
+
             container.child(statusContainer);
-            
+
             // current input state
             if (!menu.screenData.currentRedstoneEffect().isEmpty())
                 container.child(Components.label(Component.translatable(menu.screenData.currentRedstoneEffect()))
                                   .tooltip(Component.translatable(menu.screenData.currentRedstoneEffect() + ".tooltip"))
                                   .margins(Insets.of(3, 3, 1, 1)));
         }
-        
+
     }
-    
+
     private FlowLayout buildOverlay() {
-        
+
         var overlay = Containers.verticalFlow(Sizing.fixed(176), Sizing.fixed(166));
         fillOverlay(overlay);
-        
+
         return overlay;
     }
-    
+
     public void fillOverlay(FlowLayout overlay) {
-        
+
         addTitle(overlay);
-        
+
         if (menu.mainFluidContainer != null) {
             addFluidDisplay(overlay, genericDisplay);
             updateFluidDisplay(genericDisplay);
         }
-        
+
         for (var slot : menu.screenData.getGuiSlots()) {
             overlay.child(this.slotAsComponent(slot.index()).positioning(Positioning.absolute(slot.x(), slot.y())));
             overlay.child(getItemFrame(slot.x(), slot.y()));
         }
-        
+
         if (menu.screenData.showEnergy()) {
             if (menu.steamStorage != null) {
                 addFluidDisplay(overlay, steamDisplay);
@@ -497,108 +499,108 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
                 addEnergyBar(overlay);
                 updateEnergyBar();
             }
-            
+
             if (menu.blockEntity instanceof SteamEngineEntity) {
                 addEnergyBar(overlay);
                 updateEnergyBar();
             }
         }
-        
+
         if (menu.screenData.showProgress()) {
             addProgressArrow(overlay);
             updateProgressBar();
         }
     }
-    
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void onOracleButtonClick(boolean enabled, Optional<ResourceLocation> target) {
         if (!enabled || target.isEmpty()) {
             Oritech.LOGGER.info("Oracle Index mod is missing. Install it here: https://www.curseforge.com/minecraft/mc-mods/oracle-index (or from modrinth)");
             return;
         }
-        
+
         OracleClient.openScreen("oritech", target.get(), this);
     }
-    
+
     private Optional<ResourceLocation> getHelpBookLink() {
-        
-        if (this.menu.screenData.getWikiLink().isPresent()) return Optional.of(ResourceLocation.fromNamespaceAndPath(Oracle.MOD_ID, "books/oritech/" + menu.screenData.getWikiLink().get() + ".mdx"));
-        
+
+        if (this.menu.screenData.getWikiLink().isPresent()) return Optional.of(new ResourceLocation(Oracle.MOD_ID, "books/oritech/" + menu.screenData.getWikiLink().get() + ".mdx"));
+
         var blockItem = this.menu.machineBlock.getBlock().asItem();
         var itemId = BuiltInRegistries.ITEM.getKey(blockItem);
-        
+
         if (OracleClient.ITEM_LINKS.containsKey(itemId)) {
             return Optional.of(OracleClient.ITEM_LINKS.get(itemId).linkTarget());
         } else {
             return Optional.empty();
         }
-        
+
     }
-    
+
     public boolean useHighTitle() {
         return menu.machineBlock.getBlock().getName().toString().length() > 18;
     }
-    
+
     private void addTitle(FlowLayout overlay) {
         var blockTitle = menu.machineBlock.getBlock().getName();
         var label = Components.label(blockTitle);
         label.color(new Color(64 / 255f, 64 / 255f, 64 / 255f));
         label.zIndex(1);
-        
+
         var blockIcon = Components.item(getTitleIcon());
         blockIcon.sizing(Sizing.fixed(24));
-        
+
         var iconPanel = Containers.horizontalFlow(Sizing.content(0), Sizing.content(0));
         iconPanel.padding(Insets.of(2, 5, 3, 3));
         iconPanel.child(blockIcon);
         iconPanel.surface(ORITECH_PANEL);
         iconPanel.zIndex(50);
-        
+
         var textPanel = Containers.horizontalFlow(Sizing.content(0), Sizing.content(0));
         textPanel.padding(Insets.of(5, 6, 6, 5));
         textPanel.child(label);
         textPanel.surface(ORITECH_PANEL);
-        
+
         var combinedPanel = Containers.horizontalFlow(Sizing.content(), Sizing.content());
         combinedPanel.child(iconPanel);
         combinedPanel.child(textPanel.margins(Insets.of(4, 0, -1, 0)));
-        
+
         var horizontalPos = blockTitle.getString().length() > 15 ? 100 : 65;
         var verticalPos = useHighTitle()? - 25 : - 15;
-        
+
         overlay.child(combinedPanel.positioning(Positioning.relative(horizontalPos, verticalPos)));
         overlay.allowOverflow(true);
-        
+
     }
-    
+
     public ItemStack getTitleIcon() {
         return new ItemStack(this.menu.blockEntity.getBlockState().getBlock());
     }
-    
+
     private void addProgressArrow(FlowLayout panel) {
-        
+
         var config = menu.screenData.getIndicatorConfiguration();
-        
+
         var empty = Components.texture(config.empty(), 0, 0, config.width(), config.height(), config.width(), config.height());
         progress_indicator = Components.texture(config.full(), 0, 0, config.width(), config.height(), config.width(), config.height());
-        
+
         panel
           .child(empty.positioning(Positioning.absolute(config.x(), config.y())))
           .child(progress_indicator.positioning(Positioning.absolute(config.x(), config.y())));
     }
-    
+
     protected void addFluidDisplay(FlowLayout panel, FluidDisplay display) {
         panel.child(display.background);
         panel.child(display.fillOverlay);
         panel.child(display.foreGround);
     }
-    
+
     protected void updateFluidDisplay(FluidDisplay display) {
-        
+
         var background = display.background;
         var container = display.storage;
         var config = display.config;
-        
+
         // fluid variant inside has changed
         if (!display.lastDrawnFluid.equals(container.getStack().getFluid())) {
             var parent = background.parent();
@@ -610,37 +612,37 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
             display.background = background;
             display.lastDrawnFluid = container.getStack().getFluid();
         }
-        
+
         var fill = 1 - ((float) container.getStack().getAmount() / container.getCapacity());
-        
+
         var targetFill = LaserArmModel.lerp(display.lastFill, fill, 0.15f);
         display.lastFill = targetFill;
-        
+
         display.fillOverlay.verticalSizing(Sizing.fixed((int) (config.height() * targetFill * 0.98f)));
-        
+
         var tooltipText = container.getStack().getAmount() > 0
             ? Component.translatable("tooltip.oritech.fluid_content", container.getStack().getAmount() * 1000 / FluidStackHooks.bucketAmount(), FluidStackHooks.getName(container.getStack()).getString())
             : Component.translatable("tooltip.oritech.fluid_empty");
         background.tooltip(tooltipText);
     }
-    
+
     public static ColoredSpriteComponent createFluidRenderer(FluidStack stack, ScreenProvider.BarConfiguration config) {
         var sprite = FluidStackHooks.getStillTexture(stack);
         var spriteColor = FluidStackHooks.getColor(stack);
-        
+
         var parsedColor = Color.ofArgb(spriteColor);
         var opaqueColor = new Color(parsedColor.red(), parsedColor.green(), parsedColor.blue(), 1f);
         spriteColor = opaqueColor.argb();
-        
+
         return getColoredSpriteComponent(stack, config, sprite, spriteColor);
     }
-    
+
     @NotNull
     private static ColoredSpriteComponent getColoredSpriteComponent(FluidStack stack, ScreenProvider.BarConfiguration config, TextureAtlasSprite sprite, int spriteColor) {
         var tooltipText = stack.getAmount() > 0
             ? Component.translatable("tooltip.oritech.fluid_content", stack.getAmount() * 1000 / FluidStackHooks.bucketAmount(), FluidStackHooks.getName(stack).toString())
             : Component.translatable("tooltip.oritech.fluid_empty");
-        
+
         var result = new ColoredSpriteComponent(sprite);
         result.widthMultiplier = config.width() / 60f;
         result.color = Color.ofArgb(spriteColor);
@@ -649,75 +651,77 @@ public class BasicMachineScreen<S extends BasicMachineScreenHandler> extends Bas
         result.tooltip(tooltipText);
         return result;
     }
-    
+
     private void addEnergyBar(FlowLayout panel) {
-        
+
         var config = menu.screenData.getEnergyConfiguration();
         var insetSize = 1;
         var tooltipText = Component.translatable("tooltip.oritech.energy_indicator", 0, 50);
-        
+
         var frame = Containers.horizontalFlow(Sizing.fixed(config.width() + insetSize * 2), Sizing.fixed(config.height() + insetSize * 2));
         frame.surface(Surface.PANEL_INSET);
         frame.padding(Insets.of(insetSize));
         frame.positioning(Positioning.absolute(config.x() - insetSize, config.y() - insetSize));
         panel.child(frame);
-        
+
         var indicator_background = Components.texture(getGuiComponents(), 24, 0, 24, 96, 98, 96);
         indicator_background.sizing(Sizing.fixed(config.width()), Sizing.fixed(config.height()));
-        
+
         energyIndicator = Components.texture(getGuiComponents(), 0, 0, 24, (96), 98, 96);
         energyIndicator.sizing(Sizing.fixed(config.width()), Sizing.fixed(config.height()));
         energyIndicator.positioning(Positioning.absolute(0, 0));
         energyIndicator.tooltip(tooltipText);
-        
+
         frame
           .child(indicator_background)
           .child(energyIndicator);
     }
-    
+
     public static class ColoredSpriteComponent extends SpriteComponent {
-        
+
         public Color color;
         public float widthMultiplier = 1f;
-        
+
         protected ColoredSpriteComponent(TextureAtlasSprite sprite) {
             super(sprite);
         }
-        
+
         public TextureAtlasSprite getSprite() {
             return sprite;
         }
-        
+
         @Override
         public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
             if (sprite == null) return;
             SpriteUtilInvoker.markSpriteActive(this.sprite);
             drawSprite(this.x, this.y, 0, this.width, this.height, this.sprite, this.color.red(), this.color.green(), this.color.blue(), this.color.alpha(), context.pose());
         }
-        
+
         // these 2 methods are copies from drawContext, width slight modifications
         public void drawSprite(int x, int y, int z, int width, int height, TextureAtlasSprite sprite, float red, float green, float blue, float alpha, PoseStack matrices) {
-            
+
             var uvWidth = sprite.getU1() - sprite.getU0();
             var newMax = sprite.getU0() + uvWidth * widthMultiplier;
-            
+
             this.drawTexturedQuad(sprite.atlasLocation(), matrices, x, x + width, y, y + height, z, sprite.getU0(), newMax, sprite.getV0(), sprite.getV1(), red, green, blue, alpha);
         }
-        
+
         // direct copy of the method in drawContext, because it can't be called from here due to private access
         private void drawTexturedQuad(ResourceLocation texture, PoseStack matrices, int x1, int x2, int y1, int y2, int z, float u1, float u2, float v1, float v2, float red, float green, float blue, float alpha) {
             RenderSystem.setShaderTexture(0, texture);
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.enableBlend();
             Matrix4f matrix4f = matrices.last().pose();
-            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.addVertex(matrix4f, (float) x1, (float) y1, (float) z).setUv(u1, v1).setColor(red, green, blue, alpha);
-            bufferBuilder.addVertex(matrix4f, (float) x1, (float) y2, (float) z).setUv(u1, v2).setColor(red, green, blue, alpha);
-            bufferBuilder.addVertex(matrix4f, (float) x2, (float) y2, (float) z).setUv(u2, v2).setColor(red, green, blue, alpha);
-            bufferBuilder.addVertex(matrix4f, (float) x2, (float) y1, (float) z).setUv(u2, v1).setColor(red, green, blue, alpha);
-            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+            Tesselator tesselator = Tesselator.getInstance();
+            BufferBuilder bufferBuilder = tesselator.getBuilder();
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferBuilder.vertex(matrix4f, (float) x1, (float) y1, (float) z).uv(u1, v1).color(red, green, blue, alpha).endVertex();
+            bufferBuilder.vertex(matrix4f, (float) x1, (float) y2, (float) z).uv(u1, v2).color(red, green, blue, alpha).endVertex();
+            bufferBuilder.vertex(matrix4f, (float) x2, (float) y2, (float) z).uv(u2, v2).color(red, green, blue, alpha).endVertex();
+            bufferBuilder.vertex(matrix4f, (float) x2, (float) y1, (float) z).uv(u2, v1).color(red, green, blue, alpha).endVertex();
+            BufferUploader.drawWithShader(bufferBuilder.end());
             RenderSystem.disableBlend();
         }
-        
+
     }
 }
